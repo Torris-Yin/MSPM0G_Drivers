@@ -5,6 +5,7 @@
 - LP-MSPM0G3507
 - OLED(SSD1306/SSD1315)
 
+
 **Pin Connection：**
 
 | Peripheral | LaunchPad |
