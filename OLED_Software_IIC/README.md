@@ -1,12 +1,11 @@
 # OLED (Software IIC)
 
-**Hardware：**
+## Hardware：
 
 - LP-MSPM0G3507
 - OLED(SSD1306/SSD1315)
 
-
-**Pin Connection：**
+## Pin Connection：
 
 | Peripheral | LaunchPad |
 | ---------- | --------- |
