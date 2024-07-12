@@ -7,16 +7,23 @@
 #define OLED_CMD  0	//写命令
 #define OLED_DATA 1	//写数据
 
+#ifndef GPIO_OLED_PIN_SCL_PORT
+#define GPIO_OLED_PIN_SCL_PORT GPIO_OLED_PORT 
+#endif
+
+#ifndef GPIO_OLED_PIN_SDA_PORT
+#define GPIO_OLED_PIN_SDA_PORT GPIO_OLED_PORT 
+#endif
 
 //----------------------------------------------------------------------------------
 //OLED SSD1306 I2C 时钟SCL
-#define		OLED_SCL_Set()			    (DL_GPIO_setPins(GPIO_OLED_PORT, GPIO_OLED_PIN_SCL_PIN))
-#define		OLED_SCL_Clr()				(DL_GPIO_clearPins(GPIO_OLED_PORT, GPIO_OLED_PIN_SCL_PIN))
+#define		OLED_SCL_Set()			    (DL_GPIO_setPins(GPIO_OLED_PIN_SCL_PORT, GPIO_OLED_PIN_SCL_PIN))
+#define		OLED_SCL_Clr()				(DL_GPIO_clearPins(GPIO_OLED_PIN_SCL_PORT, GPIO_OLED_PIN_SCL_PIN))
 
 //----------------------------------------------------------------------------------
 //OLED SSD1306 I2C 数据SDA
-#define		OLED_SDA_Set()				(DL_GPIO_setPins(GPIO_OLED_PORT, GPIO_OLED_PIN_SDA_PIN))
-#define		OLED_SDA_Clr()			    (DL_GPIO_clearPins(GPIO_OLED_PORT, GPIO_OLED_PIN_SDA_PIN))
+#define		OLED_SDA_Set()				(DL_GPIO_setPins(GPIO_OLED_PIN_SDA_PORT, GPIO_OLED_PIN_SDA_PIN))
+#define		OLED_SDA_Clr()			    (DL_GPIO_clearPins(GPIO_OLED_PIN_SDA_PORT, GPIO_OLED_PIN_SDA_PIN))
 				   
 
 //OLED控制用函数

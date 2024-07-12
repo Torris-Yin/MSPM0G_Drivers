@@ -18,11 +18,11 @@ const SYSCTL = scripting.addModule("/ti/driverlib/SYSCTL");
 GPIO1.$name                          = "GPIO_OLED";
 GPIO1.associatedPins.create(2);
 GPIO1.associatedPins[0].$name        = "PIN_SCL";
-GPIO1.associatedPins[0].assignedPort = "PORTB";
-GPIO1.associatedPins[0].assignedPin  = "2";
+GPIO1.associatedPins[0].assignedPort = "PORTA";
+GPIO1.associatedPins[0].assignedPin  = "12";
 GPIO1.associatedPins[1].$name        = "PIN_SDA";
-GPIO1.associatedPins[1].assignedPort = "PORTB";
-GPIO1.associatedPins[1].assignedPin  = "3";
+GPIO1.associatedPins[1].assignedPort = "PORTA";
+GPIO1.associatedPins[1].assignedPin  = "13";
 
 const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
 
@@ -33,8 +33,8 @@ SYSCTL.forceDefaultClkConfig = true;
  * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
  * re-solve from scratch.
  */
-GPIO1.associatedPins[0].pin.$suggestSolution = "PB2";
-GPIO1.associatedPins[1].pin.$suggestSolution = "PB3";
+GPIO1.associatedPins[0].pin.$suggestSolution = "PA12";
+GPIO1.associatedPins[1].pin.$suggestSolution = "PA13";
 Board.peripheral.$suggestSolution            = "DEBUGSS";
 Board.peripheral.swclkPin.$suggestSolution   = "PA20";
 Board.peripheral.swdioPin.$suggestSolution   = "PA19";
