@@ -19,7 +19,6 @@ const UART1  = UART.addInstance();
  */
 I2C1.basicEnableController             = true;
 I2C1.$name                             = "I2C_MPU6050";
-I2C1.advControllerTXFIFOTRIG           = "BYTES_1";
 I2C1.intController                     = ["ARBITRATION_LOST","NACK","RXFIFO_TRIGGER","RX_DONE","TX_DONE"];
 I2C1.peripheral.$assign                = "I2C1";
 I2C1.peripheral.sdaPin.$assign         = "PB3";
