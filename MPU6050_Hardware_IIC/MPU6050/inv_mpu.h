@@ -32,15 +32,15 @@
 #define INV_XYZ_ACCEL   (0x08)
 #define INV_XYZ_COMPASS (0x01)
 
-#ifndef u8
-#define u8 uint8_t
-#endif
-#ifndef u16
-#define u16 uint16_t
-#endif
-#ifndef u32
-#define u32 uint32_t
-#endif
+// #ifndef u8
+// #define u8 uint8_t
+// #endif
+// #ifndef u16
+// #define u16 uint16_t
+// #endif
+// #ifndef u32
+// #define u32 uint32_t
+// #endif
 
 //移植官方MSP430 DMP驱动过来
 struct int_param_s {
@@ -141,8 +141,8 @@ int mpu_register_tap_cb(void (*func)(unsigned char, unsigned char));
 void mget_ms(unsigned long *time);
 unsigned short inv_row_2_scale(const signed char *row);
 unsigned short inv_orientation_matrix_to_scalar(const signed char *mtx);
-u8 run_self_test(void);
-u8 mpu_dmp_init(void);
-u8 mpu_dmp_get_data(float *pitch,float *roll,float *yaw);
+uint8_t run_self_test(void);
+uint8_t mpu_dmp_init(void);
+uint8_t mpu_dmp_get_data(float *pitch,float *roll,float *yaw);
 
 #endif  /* #ifndef _INV_MPU_H_ */

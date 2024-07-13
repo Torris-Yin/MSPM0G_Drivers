@@ -21,7 +21,7 @@ int main( void )
 {
     SYSCFG_DL_init();
     
-    u8 t=' ';
+    uint8_t t=' ';
     OLED_Init();		//初始化OLED
     while(1) 
     {		

@@ -2859,7 +2859,7 @@ static signed char gyro_orientation[9] = { 1, 0, 0,
 //MPU6050自测试
 //返回值:0,正常
 //    其他,失败
-u8 run_self_test(void)
+uint8_t run_self_test(void)
 {
 	int result;
 	//char test_packet[4] = {0};
@@ -2935,9 +2935,9 @@ void mget_ms(unsigned long *time)
 //mpu6050,dmp初始化
 //返回值:0,正常
 //    其他,失败
-u8 mpu_dmp_init(void)
+uint8_t mpu_dmp_init(void)
 {
-	u8 res=0;
+	uint8_t res=0;
     
     res = mpu_init();
 //    printf("res = %d\r\n",res);
@@ -2973,7 +2973,7 @@ u8 mpu_dmp_init(void)
 //yaw:航向角   精度:0.1°   范围:-180.0°<---> +180.0°
 //返回值:0,正常
 //    其他,失败
-u8 mpu_dmp_get_data(float *pitch,float *roll,float *yaw)
+uint8_t mpu_dmp_get_data(float *pitch,float *roll,float *yaw)
 {
 	float q0=1.0f,q1=0.0f,q2=0.0f,q3=0.0f;
 	unsigned long sensor_timestamp;

@@ -1,9 +1,9 @@
 #ifndef __OLED_H
 #define __OLED_H			  	 
 #include "ti_msp_dl_config.h"
-#define  u8 unsigned char 
-#define  u16 unsigned int
-#define  u32 unsigned int
+// #define  u8 unsigned char 
+// #define  u16 unsigned int
+// #define  u32 unsigned int
 #define OLED_CMD  0	//写命令
 #define OLED_DATA 1	//写数据
 
@@ -28,19 +28,19 @@
 
 //OLED控制用函数
 void delay_ms(unsigned int ms);
-void OLED_ColorTurn(u8 i);
-void OLED_DisplayTurn(u8 i);
-void OLED_WR_Byte(u8 dat,u8 cmd);
-void OLED_Set_Pos(u8 x, u8 y);
+void OLED_ColorTurn(uint8_t i);
+void OLED_DisplayTurn(uint8_t i);
+void OLED_WR_Byte(uint8_t dat,uint8_t cmd);
+void OLED_Set_Pos(uint8_t x, uint8_t y);
 void OLED_Display_On(void);
 void OLED_Display_Off(void);
 void OLED_Clear(void);
-void OLED_ShowChar(u8 x,u8 y,u8 chr,u8 sizey);
-u32 oled_pow(u8 m,u8 n);
-void OLED_ShowNum(u8 x,u8 y,u32 num,u8 len,u8 sizey);
-void OLED_ShowString(u8 x,u8 y,u8 *chr,u8 sizey);
-void OLED_ShowChinese(u8 x,u8 y,u8 no,u8 sizey);
-void OLED_DrawBMP(u8 x,u8 y,u8 sizex, u8 sizey,u8 BMP[]);
+void OLED_ShowChar(uint8_t x,uint8_t y,uint8_t chr,uint8_t sizey);
+uint32_t oled_pow(uint8_t m,uint8_t n);
+void OLED_ShowNum(uint8_t x,uint8_t y,uint32_t num,uint8_t len,uint8_t sizey);
+void OLED_ShowString(uint8_t x,uint8_t y,uint8_t *chr,uint8_t sizey);
+void OLED_ShowChinese(uint8_t x,uint8_t y,uint8_t no,uint8_t sizey);
+void OLED_DrawBMP(uint8_t x,uint8_t y,uint8_t sizex, uint8_t sizey,uint8_t BMP[]);
 void OLED_Init(void);
 #endif  
 	 
