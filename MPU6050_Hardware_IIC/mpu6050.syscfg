@@ -8,12 +8,11 @@
 /**
  * Import the modules used in this configuration.
  */
-const I2C     = scripting.addModule("/ti/driverlib/I2C", {}, false);
-const I2C1    = I2C.addInstance();
-const SYSCTL  = scripting.addModule("/ti/driverlib/SYSCTL");
-const SYSTICK = scripting.addModule("/ti/driverlib/SYSTICK");
-const UART    = scripting.addModule("/ti/driverlib/UART", {}, false);
-const UART1   = UART.addInstance();
+const I2C    = scripting.addModule("/ti/driverlib/I2C", {}, false);
+const I2C1   = I2C.addInstance();
+const SYSCTL = scripting.addModule("/ti/driverlib/SYSCTL");
+const UART   = scripting.addModule("/ti/driverlib/UART", {}, false);
+const UART1  = UART.addInstance();
 
 /**
  * Write custom configuration values to the imported modules.
@@ -37,10 +36,6 @@ I2C1.sclPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric3";
 const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
 
 SYSCTL.forceDefaultClkConfig = true;
-
-SYSTICK.periodEnable  = true;
-SYSTICK.period        = 32;
-SYSTICK.systickEnable = true;
 
 UART1.$name                    = "UART_0";
 UART1.peripheral.rxPin.$assign = "PA11";
