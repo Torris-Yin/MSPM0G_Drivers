@@ -25,14 +25,16 @@ void board_init(void)
     NVIC_EnableIRQ(I2C_MPU6050_INST_INT_IRQN);
 }
 
-void delay_us(unsigned long __us) 
+void delay_us(unsigned long us) 
 {
-    delay_cycles(CPUCLK_FREQ/1000000);
+    while(us--)
+        delay_cycles(CPUCLK_FREQ/1000000);
 }
 
 void delay_ms(unsigned long ms) 
 {
-	delay_cycles(CPUCLK_FREQ/1000);
+    while(ms--)
+	    delay_cycles(CPUCLK_FREQ/1000);
 }
 
 void delay_1us(unsigned long __us)

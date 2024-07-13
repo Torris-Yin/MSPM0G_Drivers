@@ -11,11 +11,10 @@
 //[5]0 1 2 3 ... 127	
 //[6]0 1 2 3 ... 127	
 //[7]0 1 2 3 ... 127 			   
-void delay_ms(unsigned int ms)
-{                         
+void delay_ms(unsigned long ms) 
+{
     while(ms--)
-        delay_cycles(CPUCLK_FREQ/1000);
-    return;
+	    delay_cycles(CPUCLK_FREQ/1000);
 }
 
 //反显函数
