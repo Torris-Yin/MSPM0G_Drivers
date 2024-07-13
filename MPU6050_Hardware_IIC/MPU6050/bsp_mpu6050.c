@@ -278,7 +278,6 @@ char MPU6050_Init(void)
 {
     uint8_t tmp[2];
 
-	SDA_OUT();
     delay_ms(10);
     //复位6050
     tmp[0] = 0x80;

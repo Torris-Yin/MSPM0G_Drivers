@@ -14,26 +14,6 @@
 
 #include "board.h"
 
-
-//设置SDA输出模式
-#define SDA_OUT()   {                                                  \
-                        DL_GPIO_initDigitalOutput(GPIO_SDA_IOMUX);     \
-						DL_GPIO_setPins(GPIO_PORT, GPIO_SDA_PIN);	   \
-                        DL_GPIO_enableOutput(GPIO_PORT, GPIO_SDA_PIN); \
-                    }
-//设置SDA输入模式
-#define SDA_IN()    { DL_GPIO_initDigitalInputFeatures(GPIO_SDA_IOMUX, DL_GPIO_INVERSION_DISABLE, DL_GPIO_RESISTOR_PULL_UP, DL_GPIO_HYSTERESIS_DISABLE, DL_GPIO_WAKEUP_DISABLE); }
-
-//获取SDA引脚的电平变化
-#define SDA_GET()   ( ( ( DL_GPIO_readPins(GPIO_PORT,GPIO_SDA_PIN) & GPIO_SDA_PIN ) > 0 ) ? 1 : 0 )
-//SDA与SCL输出
-#define SDA(x)      ( (x) ? (DL_GPIO_setPins(GPIO_PORT,GPIO_SDA_PIN)) : (DL_GPIO_clearPins(GPIO_PORT,GPIO_SDA_PIN)) )
-#define SCL(x)      ( (x) ? (DL_GPIO_setPins(GPIO_PORT,GPIO_SCL_PIN)) : (DL_GPIO_clearPins(GPIO_PORT,GPIO_SCL_PIN)) )
-
-
-//MPU6050的AD0是IIC地址引脚，接地则IIC地址为0x68,接VCC则IIC地址为0x69
-
-
 #define MPU6050_RA_SMPLRT_DIV       0x19        //陀螺仪采样率 地址
 #define MPU6050_RA_CONFIG           0x1A        //设置数字低通滤波器 地址
 #define MPU6050_RA_GYRO_CONFIG      0x1B        //陀螺仪配置寄存器

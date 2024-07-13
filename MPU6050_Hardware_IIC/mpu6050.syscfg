@@ -8,8 +8,6 @@
 /**
  * Import the modules used in this configuration.
  */
-const GPIO    = scripting.addModule("/ti/driverlib/GPIO", {}, false);
-const GPIO1   = GPIO.addInstance();
 const I2C     = scripting.addModule("/ti/driverlib/I2C", {}, false);
 const I2C1    = I2C.addInstance();
 const SYSCTL  = scripting.addModule("/ti/driverlib/SYSCTL");
@@ -20,21 +18,11 @@ const UART1   = UART.addInstance();
 /**
  * Write custom configuration values to the imported modules.
  */
-GPIO1.$name                          = "GPIO";
-GPIO1.associatedPins.create(2);
-GPIO1.associatedPins[0].$name        = "SCL";
-GPIO1.associatedPins[0].assignedPort = "PORTB";
-GPIO1.associatedPins[0].assignedPin  = "0";
-GPIO1.associatedPins[1].$name        = "SDA";
-GPIO1.associatedPins[1].assignedPort = "PORTB";
-GPIO1.associatedPins[1].assignedPin  = "16";
-
-const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
-
 I2C1.basicEnableController             = true;
 I2C1.$name                             = "I2C_MPU6050";
 I2C1.advControllerTXFIFOTRIG           = "BYTES_1";
 I2C1.intController                     = ["ARBITRATION_LOST","NACK","RXFIFO_TRIGGER","RX_DONE","TX_DONE"];
+I2C1.peripheral.$assign                = "I2C1";
 I2C1.peripheral.sdaPin.$assign         = "PB3";
 I2C1.peripheral.sclPin.$assign         = "PB2";
 I2C1.sdaPinConfig.hideOutputInversion  = scripting.forceWrite(false);
@@ -45,6 +33,8 @@ I2C1.sclPinConfig.hideOutputInversion  = scripting.forceWrite(false);
 I2C1.sclPinConfig.onlyInternalResistor = scripting.forceWrite(false);
 I2C1.sclPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
 I2C1.sclPinConfig.$name                = "ti_driverlib_gpio_GPIOPinGeneric3";
+
+const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
 
 SYSCTL.forceDefaultClkConfig = true;
 
@@ -63,11 +53,8 @@ UART1.rxPinConfig.$name        = "ti_driverlib_gpio_GPIOPinGeneric1";
  * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
  * re-solve from scratch.
  */
-GPIO1.associatedPins[0].pin.$suggestSolution = "PB0";
-GPIO1.associatedPins[1].pin.$suggestSolution = "PB16";
-Board.peripheral.$suggestSolution            = "DEBUGSS";
-Board.peripheral.swclkPin.$suggestSolution   = "PA20";
-Board.peripheral.swdioPin.$suggestSolution   = "PA19";
-I2C1.peripheral.$suggestSolution             = "I2C1";
-SYSCTL.peripheral.$suggestSolution           = "SYSCTL";
-UART1.peripheral.$suggestSolution            = "UART0";
+Board.peripheral.$suggestSolution          = "DEBUGSS";
+Board.peripheral.swclkPin.$suggestSolution = "PA20";
+Board.peripheral.swdioPin.$suggestSolution = "PA19";
+SYSCTL.peripheral.$suggestSolution         = "SYSCTL";
+UART1.peripheral.$suggestSolution          = "UART0";
