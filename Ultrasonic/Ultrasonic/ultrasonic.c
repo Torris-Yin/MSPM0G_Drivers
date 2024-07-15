@@ -5,17 +5,17 @@ uint8_t overflowFlag;
 uint32_t getUltrasonicDist(void)
 {
     uint32_t cnt, dist;
-    DL_GPIO_setPins(GPIO_Ultrasonic_PORT, GPIO_Ultrasonic_PIN_Trig_PIN);
+    DL_GPIO_setPins(GPIO_Ultrasonic_PIN_Trig_PORT, GPIO_Ultrasonic_PIN_Trig_PIN);
     delay_cycles(CPUCLK_FREQ/50000);
-    DL_GPIO_clearPins(GPIO_Ultrasonic_PORT, GPIO_Ultrasonic_PIN_Trig_PIN);
+    DL_GPIO_clearPins(GPIO_Ultrasonic_PIN_Trig_PORT, GPIO_Ultrasonic_PIN_Trig_PIN);
 
-    while(!DL_GPIO_readPins(GPIO_Ultrasonic_PORT, GPIO_Ultrasonic_PIN_Echo_PIN));
+    while(!DL_GPIO_readPins(GPIO_Ultrasonic_PIN_Echo_PORT, GPIO_Ultrasonic_PIN_Echo_PIN));
 
     overflowFlag = 0;
     DL_TimerG_setTimerCount(TIMER_Ultrasonic_INST, 0);
     DL_TimerG_startCounter(TIMER_Ultrasonic_INST);
 
-    while(DL_GPIO_readPins(GPIO_Ultrasonic_PORT, GPIO_Ultrasonic_PIN_Echo_PIN) && !overflowFlag);
+    while(DL_GPIO_readPins(GPIO_Ultrasonic_PIN_Echo_PORT, GPIO_Ultrasonic_PIN_Echo_PIN) && !overflowFlag);
 
     DL_TimerG_stopCounter(TIMER_Ultrasonic_INST);
 
