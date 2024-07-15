@@ -46,8 +46,6 @@ int main(void)
     while (1) 
     {
         dist = getUltrasonicDist();
-        if(dist > 100)
-            dist = 100;
         printf("Dist: %u cm\r\n", dist);
         delay_cycles(3200000);
     }
