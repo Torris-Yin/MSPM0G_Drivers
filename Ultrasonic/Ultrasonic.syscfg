@@ -37,7 +37,7 @@ TIMER1.$name            = "TIMER_Ultrasonic";
 TIMER1.timerMode        = "ONE_SHOT_UP";
 TIMER1.interrupts       = ["LOAD"];
 TIMER1.timerClkPrescale = 32;
-TIMER1.timerPeriod      = "65ms";
+TIMER1.timerPeriod      = "40ms";
 
 UART1.$name                    = "UART_0";
 UART1.peripheral.rxPin.$assign = "PA11";
