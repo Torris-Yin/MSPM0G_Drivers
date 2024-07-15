@@ -46,10 +46,10 @@ int main(void)
     while (1) 
     {
         dist = getUltrasonicDist();
+        delay_cycles(3200000);
         if(!dist)
             continue;
         printf("Dist: %u cm\r\n", dist);
-        delay_cycles(3200000);
     }
 }
 

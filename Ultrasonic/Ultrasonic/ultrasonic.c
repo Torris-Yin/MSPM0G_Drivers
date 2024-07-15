@@ -2,19 +2,11 @@
 
 uint8_t overflowFlag;
 
-void delay_us(uint32_t us)
-{
-    while(us--)
-    {
-        delay_cycles(CPUCLK_FREQ/1000000);
-    }
-}
-
 uint32_t getUltrasonicDist(void)
 {
     uint32_t cnt, dist;
     DL_GPIO_setPins(GPIO_Ultrasonic_PORT, GPIO_Ultrasonic_PIN_Trig_PIN);
-    delay_us(20);
+    delay_cycles(CPUCLK_FREQ/50000);
     DL_GPIO_clearPins(GPIO_Ultrasonic_PORT, GPIO_Ultrasonic_PIN_Trig_PIN);
 
     while(!DL_GPIO_readPins(GPIO_Ultrasonic_PORT, GPIO_Ultrasonic_PIN_Echo_PIN));
