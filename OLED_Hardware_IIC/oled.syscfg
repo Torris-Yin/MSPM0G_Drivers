@@ -8,8 +8,6 @@
 /**
  * Import the modules used in this configuration.
  */
-const GPIO   = scripting.addModule("/ti/driverlib/GPIO", {}, false);
-const GPIO1  = GPIO.addInstance();
 const I2C    = scripting.addModule("/ti/driverlib/I2C", {}, false);
 const I2C1   = I2C.addInstance();
 const SYSCTL = scripting.addModule("/ti/driverlib/SYSCTL");
@@ -17,17 +15,6 @@ const SYSCTL = scripting.addModule("/ti/driverlib/SYSCTL");
 /**
  * Write custom configuration values to the imported modules.
  */
-GPIO1.$name                          = "GPIO_OLED";
-GPIO1.associatedPins.create(2);
-GPIO1.associatedPins[0].$name        = "PIN_SCL";
-GPIO1.associatedPins[0].assignedPort = "PORTA";
-GPIO1.associatedPins[0].assignedPin  = "12";
-GPIO1.associatedPins[1].$name        = "PIN_SDA";
-GPIO1.associatedPins[1].assignedPort = "PORTA";
-GPIO1.associatedPins[1].assignedPin  = "13";
-
-const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
-
 I2C1.$name                             = "I2C_OLED";
 I2C1.basicEnableController             = true;
 I2C1.intController                     = ["ARBITRATION_LOST","NACK","RXFIFO_TRIGGER","RX_DONE","TX_DONE"];
@@ -43,6 +30,8 @@ I2C1.sclPinConfig.hideOutputInversion  = scripting.forceWrite(false);
 I2C1.sclPinConfig.onlyInternalResistor = scripting.forceWrite(false);
 I2C1.sclPinConfig.passedPeripheralType = scripting.forceWrite("Digital");
 
+const Board = scripting.addModule("/ti/driverlib/Board", {}, false);
+
 SYSCTL.forceDefaultClkConfig = true;
 
 /**
@@ -50,10 +39,8 @@ SYSCTL.forceDefaultClkConfig = true;
  * version of the tool will not impact the pinmux you originally saw.  These lines can be completely deleted in order to
  * re-solve from scratch.
  */
-GPIO1.associatedPins[0].pin.$suggestSolution = "PA12";
-GPIO1.associatedPins[1].pin.$suggestSolution = "PA13";
-Board.peripheral.$suggestSolution            = "DEBUGSS";
-Board.peripheral.swclkPin.$suggestSolution   = "PA20";
-Board.peripheral.swdioPin.$suggestSolution   = "PA19";
-I2C1.peripheral.$suggestSolution             = "I2C0";
-SYSCTL.peripheral.$suggestSolution           = "SYSCTL";
+I2C1.peripheral.$suggestSolution           = "I2C0";
+Board.peripheral.$suggestSolution          = "DEBUGSS";
+Board.peripheral.swclkPin.$suggestSolution = "PA20";
+Board.peripheral.swdioPin.$suggestSolution = "PA19";
+SYSCTL.peripheral.$suggestSolution         = "SYSCTL";
