@@ -1,7 +1,15 @@
 #include "oled.h"
 #include "oledfont.h"  	 
 #include "ti/driverlib/m0p/dl_core.h"
-
+#ifdef __CC_ARM
+#pragma O0
+#elif defined(__GNUC__)
+#pragma GCC optimize ("O0")
+#elif defined(__clang__)
+#pragma clang optimize off
+#else
+//adding ur own compiler controlling pragmas
+#endif
 enum I2cControllerStatus {
     I2C_STATUS_IDLE = 0,
     I2C_STATUS_TX_STARTED,

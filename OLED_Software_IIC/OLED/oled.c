@@ -1,6 +1,15 @@
 #include "oled.h"
 #include "oledfont.h"  	 
 #include "ti/driverlib/m0p/dl_core.h"
+#ifdef __CC_ARM
+#pragma O0
+#elif defined(__GNUC__)
+#pragma GCC optimize ("O0")
+#elif defined(__clang__)
+#pragma clang optimize off
+#else
+//adding ur own compiler controlling pragmas
+#endif
 //OLED的显存
 //存放格式如下.
 //[0]0 1 2 3 ... 127	
