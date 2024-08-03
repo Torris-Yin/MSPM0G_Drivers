@@ -1,6 +1,15 @@
 #ifndef __OLED_H
 #define __OLED_H			  	 
 #include "ti_msp_dl_config.h"
+#ifdef __CC_ARM
+#pragma O0
+#elif defined(__GNUC__)
+#pragma GCC optimize ("O0")
+#elif defined(__clang__)
+#pragma clang optimize off
+#else
+//adding ur own compiler controlling pragmas
+#endif
 // #define  u8 unsigned char 
 // #define  u16 unsigned int
 // #define  u32 unsigned int
