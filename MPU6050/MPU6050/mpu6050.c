@@ -203,7 +203,8 @@ int Read_Quad(void)
     * registered). The more parameter is non-zero if there are
     * leftover packets in the FIFO.
     */
-    dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors, &more);
+    if(dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors, &more))
+        return -1;
 
     float q0 = 0.0f;
     float q1 = 0.0f;
