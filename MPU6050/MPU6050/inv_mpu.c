@@ -23,13 +23,6 @@
 #include <string.h>
 #include <math.h>
 #include "inv_mpu.h"
-#include "inv_mpu_dmp_motion_driver.h"
-#include "bsp_mpu6050.h"
-#include "board.h"
-
-
-#define MPU6050							//定义我们使用的传感器为MPU6050
-#define MOTION_DRIVER_TARGET_MSP430		//定义驱动部分,采用MSP430的驱动(移植到STM32F4)
 
 /* The following functions must be defined for this platform:
  * i2c_write(unsigned char slave_addr, unsigned char reg_addr,
@@ -44,21 +37,21 @@
  * min(int a, int b)
  */
 #if defined MOTION_DRIVER_TARGET_MSP430
-//#include "msp430.h"
-//#include "msp430_i2c.h"
-//#include "msp430_clock.h"
-//#include "msp430_interrupt.h"
-
-#define i2c_write   MPU6050_WriteReg
-#define i2c_read    MPU6050_ReadData
-#define get_ms      mget_ms
-//static inline int reg_int_cb(struct int_param_s *int_param)
-//{
-//    return msp430_reg_int_cb(int_param->cb, int_param->pin, int_param->lp_exit,
-//        int_param->active_low);
-//}
-#define log_i 	printf	//打印信息
-#define log_e  	printf	//打印信息
+#include "msp430.h"
+#include "msp430_i2c.h"
+#include "msp430_clock.h"
+#include "msp430_interrupt.h"
+#define i2c_write   msp430_i2c_write
+#define i2c_read    msp430_i2c_read
+#define delay_ms    msp430_delay_ms
+#define get_ms      msp430_get_clock_ms
+static inline int reg_int_cb(struct int_param_s *int_param)
+{
+    return msp430_reg_int_cb(int_param->cb, int_param->pin, int_param->lp_exit,
+        int_param->active_low);
+}
+#define log_i(...)     do {} while (0)
+#define log_e(...)     do {} while (0)
 /* labs is already defined by TI's toolchain. */
 /* fabs is for doubles. fabsf is for floats. */
 #define fabs        fabsf
@@ -108,6 +101,19 @@ static inline int reg_int_cb(struct int_param_s *int_param)
 /* UC3 is a 32-bit processor, so abs and labs are equivalent. */
 #define labs        abs
 #define fabs(x)     (((x)>0)?(x):-(x))
+#elif defined MOTION_DRIVER_TARGET_MSPM0
+#include "mspm0_i2c.h"
+#include "mspm0_clock.h"
+#define i2c_write   mspm0_i2c_write
+#define i2c_read    mspm0_i2c_read
+#define delay_ms    mspm0_delay_ms
+#define get_ms      mspm0_get_clock_ms
+#define log_i(...)     do {} while (0)
+#define log_e(...)     do {} while (0)
+/* labs is already defined by TI's toolchain. */
+/* fabs is for doubles. fabsf is for floats. */
+#define fabs        fabsf
+#define min(a,b) ((a<b)?a:b)
 #else
 #error  Gyro driver is missing the system layer implementations.
 #endif
@@ -165,8 +171,8 @@ struct gyro_reg_s {
     unsigned char fifo_en;
     unsigned char gyro_cfg;
     unsigned char accel_cfg;
-//    unsigned char accel_cfg2;
-//    unsigned char lp_accel_odr;
+    unsigned char accel_cfg2;
+    unsigned char lp_accel_odr;
     unsigned char motion_thr;
     unsigned char motion_dur;
     unsigned char fifo_count_h;
@@ -177,7 +183,7 @@ struct gyro_reg_s {
     unsigned char int_enable;
     unsigned char dmp_int_status;
     unsigned char int_status;
-//    unsigned char accel_intel;
+    unsigned char accel_intel;
     unsigned char pwr_mgmt_1;
     unsigned char pwr_mgmt_2;
     unsigned char int_pin_cfg;
@@ -446,145 +452,83 @@ enum lp_accel_rate_e {
 #endif
 
 #if defined MPU6050
-//const struct gyro_reg_s reg = {
-//    .who_am_i       = 0x75,
-//    .rate_div       = 0x19,
-//    .lpf            = 0x1A,
-//    .prod_id        = 0x0C,
-//    .user_ctrl      = 0x6A,
-//    .fifo_en        = 0x23,
-//    .gyro_cfg       = 0x1B,
-//    .accel_cfg      = 0x1C,
-//    .motion_thr     = 0x1F,
-//    .motion_dur     = 0x20,
-//    .fifo_count_h   = 0x72,
-//    .fifo_r_w       = 0x74,
-//    .raw_gyro       = 0x43,
-//    .raw_accel      = 0x3B,
-//    .temp           = 0x41,
-//    .int_enable     = 0x38,
-//    .dmp_int_status = 0x39,
-//    .int_status     = 0x3A,
-//    .pwr_mgmt_1     = 0x6B,
-//    .pwr_mgmt_2     = 0x6C,
-//    .int_pin_cfg    = 0x37,
-//    .mem_r_w        = 0x6F,
-//    .accel_offs     = 0x06,
-//    .i2c_mst        = 0x24,
-//    .bank_sel       = 0x6D,
-//    .mem_start_addr = 0x6E,
-//    .prgm_start_h   = 0x70
-//#ifdef AK89xx_SECONDARY
-//    ,.raw_compass   = 0x49,
-//    .yg_offs_tc     = 0x01,
-//    .s0_addr        = 0x25,
-//    .s0_reg         = 0x26,
-//    .s0_ctrl        = 0x27,
-//    .s1_addr        = 0x28,
-//    .s1_reg         = 0x29,
-//    .s1_ctrl        = 0x2A,
-//    .s4_ctrl        = 0x34,
-//    .s0_do          = 0x63,
-//    .s1_do          = 0x64,
-//    .i2c_delay_ctrl = 0x67
-//#endif
-//};
 const struct gyro_reg_s reg = {
-0x75,  //who_am_i
-0x19,  //rate_div
-0x1A,  //lpf
-0x0C,  //prod_id
-0x6A,  //user_ctrl
-0x23,  //fifo_en
-0x1B,  //gyro_cfg
-0x1C,  //accel_cfg
-0x1F,  // motion_thr
-0x20,  // motion_dur
-0x72,  // fifo_count_h
-0x74,  // fifo_r_w
-0x43,  // raw_gyro
-0x3B,  // raw_accel
-0x41,  // temp
-0x38,  // int_enable
-0x39,  //  dmp_int_status
-0x3A,  //  int_status
-0x6B,  // pwr_mgmt_1
-0x6C,  // pwr_mgmt_2
-0x37,  // int_pin_cfg
-0x6F,  // mem_r_w
-0x06,  // accel_offs
-0x24,  // i2c_mst
-0x6D,  // bank_sel
-0x6E,  // mem_start_addr
-0x70   // prgm_start_h
+    .who_am_i       = 0x75,
+    .rate_div       = 0x19,
+    .lpf            = 0x1A,
+    .prod_id        = 0x0C,
+    .user_ctrl      = 0x6A,
+    .fifo_en        = 0x23,
+    .gyro_cfg       = 0x1B,
+    .accel_cfg      = 0x1C,
+    .motion_thr     = 0x1F,
+    .motion_dur     = 0x20,
+    .fifo_count_h   = 0x72,
+    .fifo_r_w       = 0x74,
+    .raw_gyro       = 0x43,
+    .raw_accel      = 0x3B,
+    .temp           = 0x41,
+    .int_enable     = 0x38,
+    .dmp_int_status = 0x39,
+    .int_status     = 0x3A,
+    .pwr_mgmt_1     = 0x6B,
+    .pwr_mgmt_2     = 0x6C,
+    .int_pin_cfg    = 0x37,
+    .mem_r_w        = 0x6F,
+    .accel_offs     = 0x06,
+    .i2c_mst        = 0x24,
+    .bank_sel       = 0x6D,
+    .mem_start_addr = 0x6E,
+    .prgm_start_h   = 0x70
+#ifdef AK89xx_SECONDARY
+    ,.raw_compass   = 0x49,
+    .yg_offs_tc     = 0x01,
+    .s0_addr        = 0x25,
+    .s0_reg         = 0x26,
+    .s0_ctrl        = 0x27,
+    .s1_addr        = 0x28,
+    .s1_reg         = 0x29,
+    .s1_ctrl        = 0x2A,
+    .s4_ctrl        = 0x34,
+    .s0_do          = 0x63,
+    .s1_do          = 0x64,
+    .i2c_delay_ctrl = 0x67
+#endif
+};
+const struct hw_s hw = {
+    .addr           = 0x68,
+    .max_fifo       = 1024,
+    .num_reg        = 118,
+    .temp_sens      = 340,
+    .temp_offset    = -521,
+    .bank_size      = 256
+#if defined AK89xx_SECONDARY
+    ,.compass_fsr    = AK89xx_FSR
+#endif
 };
 
-//const struct hw_s hw = {
-//    .addr           = 0x68,
-//    .max_fifo       = 1024,
-//    .num_reg        = 118,
-//    .temp_sens      = 340,
-//    .temp_offset    = -521,
-//    .bank_size      = 256
-//#if defined AK89xx_SECONDARY
-//    ,.compass_fsr    = AK89xx_FSR
-//#endif
-//};
-const struct hw_s hw={
-  0x68,	 //addr
-  1024,	 //max_fifo
-  118,	 //num_reg
-  340,	 //temp_sens
-  -521,	 //temp_offset
-  256	 //bank_size
+const struct test_s test = {
+    .gyro_sens      = 32768/250,
+    .accel_sens     = 32768/16,
+    .reg_rate_div   = 0,    /* 1kHz. */
+    .reg_lpf        = 1,    /* 188Hz. */
+    .reg_gyro_fsr   = 0,    /* 250dps. */
+    .reg_accel_fsr  = 0x18, /* 16g. */
+    .wait_ms        = 50,
+    .packet_thresh  = 5,    /* 5% */
+    .min_dps        = 10.f,
+    .max_dps        = 105.f,
+    .max_gyro_var   = 0.14f,
+    .min_g          = 0.3f,
+    .max_g          = 0.95f,
+    .max_accel_var  = 0.14f
 };
 
-//const struct test_s test = {
-//    .gyro_sens      = 32768/250,
-//    .accel_sens     = 32768/16,
-//    .reg_rate_div   = 0,    /* 1kHz. */
-//    .reg_lpf        = 1,    /* 188Hz. */
-//    .reg_gyro_fsr   = 0,    /* 250dps. */
-//    .reg_accel_fsr  = 0x18, /* 16g. */
-//    .wait_ms        = 50,
-//    .packet_thresh  = 5,    /* 5% */
-//    .min_dps        = 10.f,
-//    .max_dps        = 105.f,
-//    .max_gyro_var   = 0.14f,
-//    .min_g          = 0.3f,
-//    .max_g          = 0.95f,
-//    .max_accel_var  = 0.14f
-//};
-const struct test_s test={
-32768/250,		 //gyro_sens
-32768/16,		 //	accel_sens
-0,				 //	reg_rate_div
-1,				//	reg_lpf
-0,				 //	reg_gyro_fsr
-0x18,			//	reg_accel_fsr
-50,				//	wait_ms
-5,				//	packet_thresh
-10.0f,			 //	min_dps
-105.0f,			 //	max_dps
-0.14f,			//	max_gyro_var
-0.3f,		   //	min_g
-0.95f,		   //	max_g
-0.14f		   //	max_accel_var
+static struct gyro_state_s st = {
+    .reg = &reg,
+    .hw = &hw,
+    .test = &test
 };
-
-//static struct gyro_state_s st = {
-//    .reg = &reg,
-//    .hw = &hw,
-//    .test = &test
-//};
-static struct gyro_state_s st={
-  &reg,
-  &hw,
-  {0},
-  &test
-};
-
-
 #elif defined MPU6500
 const struct gyro_reg_s reg = {
     .who_am_i       = 0x75,
@@ -760,6 +704,7 @@ int mpu_read_reg(unsigned char reg, unsigned char *data)
 int mpu_init(void)
 {
     unsigned char data[6], rev;
+
     /* Reset device. */
     data[0] = BIT_RESET;
     if (i2c_write(st.hw->addr, st.reg->pwr_mgmt_1, 1, data))
@@ -854,9 +799,6 @@ int mpu_init(void)
         return -1;
     if (mpu_configure_fifo(0))
         return -1;
-
-//    if (int_param)
-//        reg_int_cb(int_param);
 
 #ifdef AK89xx_SECONDARY
     setup_compass();
@@ -1110,7 +1052,7 @@ int mpu_reset_fifo(void)
         data = BIT_FIFO_RST | BIT_DMP_RST;
         if (i2c_write(st.hw->addr, st.reg->user_ctrl, 1, &data))
             return -1;
-        // delay_ms(50);
+        delay_ms(50);
         data = BIT_DMP_EN | BIT_FIFO_EN;
         if (st.chip_cfg.sensors & INV_XYZ_COMPASS)
             data |= BIT_AUX_IF_EN;
@@ -1135,7 +1077,7 @@ int mpu_reset_fifo(void)
             data = BIT_FIFO_EN | BIT_AUX_IF_EN;
         if (i2c_write(st.hw->addr, st.reg->user_ctrl, 1, &data))
             return -1;
-        // delay_ms(50);
+        delay_ms(50);
         if (st.chip_cfg.int_enable)
             data = BIT_DATA_RDY_EN;
         else
@@ -2423,7 +2365,7 @@ int mpu_get_dmp_state(unsigned char *enabled)
 
 
 /* This initialization is similar to the one in ak8975.c. */
-int setup_compass(void)
+static int setup_compass(void)
 {
 #ifdef AK89xx_SECONDARY
     unsigned char data[4], akm_addr;
@@ -2849,158 +2791,7 @@ lp_int_restore:
     return 0;
 }
 
-//q30格式,long转float时的除数.
-#define q30  1073741824.0f
+/**
+ *  @}
+ */
 
-//陀螺仪方向设置
-static signed char gyro_orientation[9] = { 1, 0, 0,
-                                           0, 1, 0,
-                                           0, 0, 1};
-//MPU6050自测试
-//返回值:0,正常
-//    其他,失败
-uint8_t run_self_test(void)
-{
-	int result;
-	//char test_packet[4] = {0};
-	long gyro[3], accel[3]; 
-	result = mpu_run_self_test(gyro, accel);
-	if (result == 0x3) 
-	{
-		/* Test passed. We can trust the gyro data here, so let's push it down
-		* to the DMP.
-		*/
-		float sens;
-		unsigned short accel_sens;
-		mpu_get_gyro_sens(&sens);
-		gyro[0] = (long)(gyro[0] * sens);
-		gyro[1] = (long)(gyro[1] * sens);
-		gyro[2] = (long)(gyro[2] * sens);
-		dmp_set_gyro_bias(gyro);
-		mpu_get_accel_sens(&accel_sens);
-		accel[0] *= accel_sens;
-		accel[1] *= accel_sens;
-		accel[2] *= accel_sens;
-		dmp_set_accel_bias(accel);
-		return 0;
-	}else return 1;
-}
-//陀螺仪方向控制
-unsigned short inv_orientation_matrix_to_scalar(
-    const signed char *mtx)
-{
-    unsigned short scalar; 
-    /*
-       XYZ  010_001_000 Identity Matrix
-       XZY  001_010_000
-       YXZ  010_000_001
-       YZX  000_010_001
-       ZXY  001_000_010
-       ZYX  000_001_010
-     */
-
-    scalar = inv_row_2_scale(mtx);
-    scalar |= inv_row_2_scale(mtx + 3) << 3;
-    scalar |= inv_row_2_scale(mtx + 6) << 6;
-
-
-    return scalar;
-}
-//方向转换
-unsigned short inv_row_2_scale(const signed char *row)
-{
-    unsigned short b;
-
-    if (row[0] > 0)
-        b = 0;
-    else if (row[0] < 0)
-        b = 4;
-    else if (row[1] > 0)
-        b = 1;
-    else if (row[1] < 0)
-        b = 5;
-    else if (row[2] > 0)
-        b = 2;
-    else if (row[2] < 0)
-        b = 6;
-    else
-        b = 7;      // error
-    return b;
-}
-//空函数,未用到.
-void mget_ms(unsigned long *time)
-{
-
-}
-//mpu6050,dmp初始化
-//返回值:0,正常
-//    其他,失败
-uint8_t mpu_dmp_init(void)
-{
-	uint8_t res=0;
-    
-    res = mpu_init();
-//    printf("res = %d\r\n",res);
-	if(res==0)	//初始化MPU6050
-	{	 
-		res=mpu_set_sensors(INV_XYZ_GYRO|INV_XYZ_ACCEL);//设置所需要的传感器
-		if(res)return 1; 
-		res=mpu_configure_fifo(INV_XYZ_GYRO | INV_XYZ_ACCEL);//设置FIFO
-		if(res)return 2; 
-		res=mpu_set_sample_rate(DEFAULT_MPU_HZ);	//设置采样率
-		if(res)return 3; 
-		res=dmp_load_motion_driver_firmware();		//加载dmp固件
-		if(res)return 4; 
-		res=dmp_set_orientation(inv_orientation_matrix_to_scalar(gyro_orientation));//设置陀螺仪方向
-		if(res)return 5; 
-		res=dmp_enable_feature(DMP_FEATURE_6X_LP_QUAT|DMP_FEATURE_TAP|	//设置dmp功能
-		    DMP_FEATURE_ANDROID_ORIENT|DMP_FEATURE_SEND_RAW_ACCEL|DMP_FEATURE_SEND_CAL_GYRO|
-		    DMP_FEATURE_GYRO_CAL);
-		if(res)return 6; 
-		res=dmp_set_fifo_rate(DEFAULT_MPU_HZ);	//设置DMP输出速率(最大不超过200Hz)
-		if(res)return 7;           
-//		res=run_self_test();		//自检
-//		if(res)return 8;          
-		res=mpu_set_dmp_state(1);	//使能DMP
-		if(res)return 9;     
-	}
-    
-	return 0;
-}
-//得到dmp处理后的数据(注意,本函数需要比较多堆栈,局部变量有点多)
-//pitch:俯仰角 精度:0.1°   范围:-90.0° <---> +90.0°
-//roll:横滚角  精度:0.1°   范围:-180.0°<---> +180.0°
-//yaw:航向角   精度:0.1°   范围:-180.0°<---> +180.0°
-//返回值:0,正常
-//    其他,失败
-uint8_t mpu_dmp_get_data(float *pitch,float *roll,float *yaw)
-{
-	float q0=1.0f,q1=0.0f,q2=0.0f,q3=0.0f;
-	unsigned long sensor_timestamp;
-	short gyro[3], accel[3], sensors;
-	unsigned char more;
-	long quat[4]; 
-	if(dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors,&more))return 1;	 
-	/* Gyro and accel data are written to the FIFO by the DMP in chip frame and hardware units.
-	 * This behavior is convenient because it keeps the gyro and accel outputs of dmp_read_fifo and mpu_read_fifo consistent.
-	**/
-	/*if (sensors & INV_XYZ_GYRO )
-	send_packet(PACKET_TYPE_GYRO, gyro);
-	if (sensors & INV_XYZ_ACCEL)
-	send_packet(PACKET_TYPE_ACCEL, accel); */
-	/* Unlike gyro and accel, quaternions are written to the FIFO in the body frame, q30.
-	 * The orientation is set by the scalar passed to dmp_set_orientation during initialization. 
-	**/
-	if(sensors&INV_WXYZ_QUAT) 
-	{
-		q0 = quat[0] / q30;	//q30格式转换为浮点数
-		q1 = quat[1] / q30;
-		q2 = quat[2] / q30;
-		q3 = quat[3] / q30; 
-		//计算得到俯仰角/横滚角/航向角
-		*pitch = asin(-2 * q1 * q3 + 2 * q0* q2)* 57.3;	// pitch
-		*roll  = atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2* q2 + 1)* 57.3;	// roll
-		*yaw   = atan2(2*(q1*q2 + q0*q3),q0*q0+q1*q1-q2*q2-q3*q3) * 57.3;	//yaw
-	}else return 2;
-	return 0;
-}

@@ -29,42 +29,47 @@
  * OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "board.h"
-#include <stdio.h>
-#include "bsp_mpu6050.h"
-#include "inv_mpu.h"
 
-uint8_t status;
+#include "ti_msp_dl_config.h"
+#include "mpu6050.h"
+#include "oled.h"
+#include "stdio.h"
+
+volatile uint8_t mpu6050_int_flag = 0;
+uint8_t oled_buffer[16];
 
 int main(void)
 {
-	board_init();
-	
-	MPU6050_Init();
-	
-    uint8_t ret = 1;
-          
-    float pitch=0,roll=0,yaw=0;
+    SYSCFG_DL_init();
+    mpu6050_init();
+    OLED_Init();
 
-    printf("start\r\n");
+    NVIC_EnableIRQ(GPIO_MPU6050_INT_IRQN);
 
-    while( mpu_dmp_init() )
-    {
-        printf("dmp error\r\n");
-        delay_ms(200);
-    }
-    printf("Initialization Data Succeed \r\n");
-    while(1) 
-    {
-        status = mpu_dmp_get_data(&pitch,&roll,&yaw);
-        if( status == 0 )
-        { 
-            printf("pitch =%d\r\n", (int)pitch);
-            printf("roll =%d\r\n", (int)roll);
-            printf("yaw =%d\r\n\r\n", (int)yaw);
+    OLED_ShowString(0,0,(uint8_t *)"Pitch:",16);
+    OLED_ShowString(0,2,(uint8_t *)" Roll:",16);
+    OLED_ShowString(0,4,(uint8_t *)"  Yaw:",16);
+
+    while (1) {
+        if(mpu6050_int_flag)
+        {
+            mpu6050_int_flag = 0;
+            Read_Quad();
+            sprintf((char *)oled_buffer, "%6.1f", pitch);
+            OLED_ShowString(7*8,0,oled_buffer,16);
+            sprintf((char *)oled_buffer, "%6.1f", roll);
+            OLED_ShowString(7*8,2,oled_buffer,16);
+            sprintf((char *)oled_buffer, "%6.1f", yaw);
+            OLED_ShowString(7*8,4,oled_buffer,16);
         }
-        delay_ms(20);
     }
-
 }
 
+void GROUP1_IRQHandler(void)
+{
+    switch (DL_Interrupt_getPendingGroup(DL_INTERRUPT_GROUP_1)) {
+        case GPIO_MPU6050_PIN_INT_IIDX:
+            mpu6050_int_flag = 1;
+            break;
+    }
+}
