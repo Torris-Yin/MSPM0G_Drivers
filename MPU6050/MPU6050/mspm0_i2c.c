@@ -40,7 +40,6 @@ int mspm0_i2c_read(unsigned char slave_addr,
         return 0;
 
     DL_I2C_transmitControllerData(I2C_MPU6050_INST, reg_addr);
-    // DL_I2C_enableControllerReadOnTXEmpty(I2C_MPU6050_INST);
     I2C_MPU6050_INST->MASTER.MCTR = I2C_MCTR_RD_ON_TXEMPTY_ENABLE;
     DL_I2C_clearInterruptStatus(I2C_MPU6050_INST, DL_I2C_INTERRUPT_CONTROLLER_RX_DONE);
     DL_I2C_startControllerTransfer(I2C_MPU6050_INST, slave_addr, DL_I2C_CONTROLLER_DIRECTION_RX, length);
@@ -59,7 +58,6 @@ int mspm0_i2c_read(unsigned char slave_addr,
         }
     } while(!DL_I2C_getRawInterruptStatus(I2C_MPU6050_INST, DL_I2C_INTERRUPT_CONTROLLER_RX_DONE));
 
-    // DL_I2C_disableControllerReadOnTXEmpty(I2C_MPU6050_INST);
     I2C_MPU6050_INST->MASTER.MCTR = 0*I2C_MCTR_RD_ON_TXEMPTY_ENABLE;
     DL_I2C_flushControllerTXFIFO(I2C_MPU6050_INST);
     
