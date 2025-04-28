@@ -2,7 +2,7 @@
 ## Cowork of Torris Yin and DCZYewen.
 
 - OLED(Software IIC/Hardware IIC)
-- MPU6050(Hardware IIC) [This project includes code from **Bruce McKenney (2025)** under the **BSD 2-Clause License**]
+- MPU6050 [This project includes code from **Bruce McKenney (2025)** under the **BSD 2-Clause License**]
 - HC-SR04超声波
 - VL53L0X(Hardware IIC) [基于[立创开发板例程](https://lceda001.feishu.cn/wiki/X5fbwOdSgicxrmkCiHWcbUDnniv#part-QWVBdXFy5oGz09x9yDpcgXhwnAd)二次移植]
 - AD9954(Software SPI) 基于康威科技模块厂家例程移植到MSPM0平台。
