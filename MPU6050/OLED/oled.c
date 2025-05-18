@@ -54,72 +54,32 @@ if(i==0)
     }
 }
 
-//起始信号
-void I2C_Start(void)
-{
-    OLED_SDA_Set();
-    OLED_SCL_Set();
-
-    OLED_SDA_Clr();
-    OLED_SCL_Clr();
-}
-
-//结束信号
-void I2C_Stop(void)
-{
-    OLED_SDA_Clr();
-    OLED_SCL_Set();
-
-    OLED_SDA_Set();
-}
-
-//等待信号响应
-void I2C_WaitAck(void) //测数据信号的电平
-{
-    OLED_SDA_Set();
-
-    OLED_SCL_Set();
-
-    OLED_SCL_Clr();
-}
-
-//写入一个字节
-void Send_Byte(uint8_t dat)
-{
-    uint8_t i;
-    for(i=0;i<8;i++)
-    {
-        OLED_SCL_Clr();//将时钟信号设置为低电平
-        if(dat&0x80)//将dat的8位从最高位依次写入
-        {
-            OLED_SDA_Set();
-        }
-        else
-        {
-            OLED_SDA_Clr();
-        }
-
-        OLED_SCL_Set();
-
-        OLED_SCL_Clr();
-        dat<<=1;
-    }
-}
-
 //发送一个字节
 //向SSD1306写入一个字节。
 //mode:数据/命令标志 0,表示命令;1,表示数据;
 void OLED_WR_Byte(uint8_t dat,uint8_t mode)
 {
-    I2C_Start();
-    Send_Byte(0x78);
-    I2C_WaitAck();
-    if(mode){Send_Byte(0x40);}
-    else{Send_Byte(0x00);}
-    I2C_WaitAck();
-    Send_Byte(dat);
-    I2C_WaitAck();
-    I2C_Stop();
+    unsigned char ptr[2];
+
+    if(mode)
+    {
+        ptr[0] = 0x40;
+        ptr[1] = dat;
+    }
+    else
+    {
+        ptr[0] = 0x00;
+        ptr[1] = dat;
+    }
+
+    DL_I2C_fillControllerTXFIFO(I2C_OLED_INST, ptr, 2);
+    DL_I2C_clearInterruptStatus(I2C_OLED_INST, DL_I2C_INTERRUPT_CONTROLLER_TX_DONE);
+    DL_I2C_startControllerTransfer(I2C_OLED_INST, 0x3C, DL_I2C_CONTROLLER_DIRECTION_TX, 2);
+
+    while (!DL_I2C_getRawInterruptStatus(I2C_OLED_INST, DL_I2C_INTERRUPT_CONTROLLER_TX_DONE));
+
+    while (DL_I2C_getControllerStatus(I2C_OLED_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS);
+    DL_I2C_flushControllerTXFIFO(I2C_OLED_INST);
 }
 
 

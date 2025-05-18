@@ -22,7 +22,7 @@
 #define NO_MOTION       (1)
 
 /* Starting sampling rate. */
-#define DEFAULT_MPU_HZ  (100)
+#define DEFAULT_MPU_HZ  (20)
 
 #define FLASH_SIZE      (512)
 #define FLASH_MEM_START ((void*)0x1800)
@@ -127,7 +127,7 @@ void mpu6050_init(void)
 
     result = mpu_init();
     if (result)
-        DL_SYSCTL_resetDevice(DL_SYSCTL_RESET_POR);
+        __BKPT();
 
     /* Get/set hardware configuration. Start gyro. */
     /* Wake up all sensors. */
@@ -203,14 +203,15 @@ int Read_Quad(void)
     * registered). The more parameter is non-zero if there are
     * leftover packets in the FIFO.
     */
-    int err = 0;
+
+    int result;
 
     do
     {
-        err = dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors, &more);
+        result = dmp_read_fifo(gyro, accel, quat, &sensor_timestamp, &sensors, &more);
     }while(more);
 
-    if(err)
+    if(result)
         return -1;
 
     float q0 = 0.0f;
