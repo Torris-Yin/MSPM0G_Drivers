@@ -76,7 +76,14 @@ void OLED_WR_Byte(uint8_t dat,uint8_t mode)
     DL_I2C_clearInterruptStatus(I2C_OLED_INST, DL_I2C_INTERRUPT_CONTROLLER_TX_DONE);
     DL_I2C_startControllerTransfer(I2C_OLED_INST, 0x3C, DL_I2C_CONTROLLER_DIRECTION_TX, 2);
 
-    while (!DL_I2C_getRawInterruptStatus(I2C_OLED_INST, DL_I2C_INTERRUPT_CONTROLLER_TX_DONE));
+    while (!DL_I2C_getRawInterruptStatus(I2C_OLED_INST, DL_I2C_INTERRUPT_CONTROLLER_TX_DONE))
+    {
+        if(DL_I2C_getControllerStatus(I2C_OLED_INST) & (DL_I2C_CONTROLLER_STATUS_ERROR | DL_I2C_CONTROLLER_STATUS_ARBITRATION_LOST))
+        {
+            DL_I2C_flushControllerTXFIFO(I2C_OLED_INST);
+            return;
+        }
+    }
 
     while (DL_I2C_getControllerStatus(I2C_OLED_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS);
     DL_I2C_flushControllerTXFIFO(I2C_OLED_INST);

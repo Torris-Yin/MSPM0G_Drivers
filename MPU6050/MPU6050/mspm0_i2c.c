@@ -22,6 +22,12 @@ int mspm0_i2c_write(unsigned char slave_addr,
         fillcnt = DL_I2C_fillControllerTXFIFO(I2C_MPU6050_INST, ptr, cnt);
         cnt -= fillcnt;
         ptr += fillcnt;
+
+        if(DL_I2C_getControllerStatus(I2C_MPU6050_INST) & (DL_I2C_CONTROLLER_STATUS_ERROR | DL_I2C_CONTROLLER_STATUS_ARBITRATION_LOST))
+        {
+            DL_I2C_flushControllerTXFIFO(I2C_MPU6050_INST);
+            return -1;
+        }
     } while (!DL_I2C_getRawInterruptStatus(I2C_MPU6050_INST, DL_I2C_INTERRUPT_CONTROLLER_TX_DONE));
 
     while (DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS);
@@ -29,8 +35,6 @@ int mspm0_i2c_write(unsigned char slave_addr,
 
     return 0;
 }
-
-unsigned long err_cnt = 0;
 
 int mspm0_i2c_read(unsigned char slave_addr,
                     unsigned char reg_addr,
@@ -59,7 +63,6 @@ int mspm0_i2c_read(unsigned char slave_addr,
         }
         if(DL_I2C_getControllerStatus(I2C_MPU6050_INST) & (DL_I2C_CONTROLLER_STATUS_ERROR | DL_I2C_CONTROLLER_STATUS_ARBITRATION_LOST))
         {
-            err_cnt++;
             break;
         }
     } while(!DL_I2C_getRawInterruptStatus(I2C_MPU6050_INST, DL_I2C_INTERRUPT_CONTROLLER_RX_DONE));
