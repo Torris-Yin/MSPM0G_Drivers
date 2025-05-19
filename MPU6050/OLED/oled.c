@@ -88,9 +88,9 @@ void OLED_WR_Byte(uint8_t dat,uint8_t mode)
         mspm0_get_clock_ms(&cur);
         if(cur >= (start + I2C_TIMEOUT_MS))
         {
-            DL_I2C_reset(I2C_MPU6050_INST);
-            DL_I2C_enablePower(I2C_MPU6050_INST);
-            SYSCFG_DL_I2C_MPU6050_init();
+            DL_I2C_reset(I2C_OLED_INST);
+            DL_I2C_enablePower(I2C_OLED_INST);
+            SYSCFG_DL_I2C_OLED_init();
             break;
         }
     }
