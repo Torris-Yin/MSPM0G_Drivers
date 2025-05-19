@@ -2,6 +2,8 @@
 #include "mspm0_clock.h"
 #include "mspm0_i2c.h"
 
+#define I2C_TIMEOUT_MS  (10)
+
 int mspm0_i2c_write(unsigned char slave_addr,
                      unsigned char reg_addr,
                      unsigned char length,
@@ -9,9 +11,12 @@ int mspm0_i2c_write(unsigned char slave_addr,
 {
     unsigned int cnt = length;
     unsigned char const *ptr = data;
+    unsigned long start, cur;
 
     if (!length)
         return 0;
+
+    mspm0_get_clock_ms(&start);
 
     DL_I2C_transmitControllerData(I2C_MPU6050_INST, reg_addr);
     DL_I2C_clearInterruptStatus(I2C_MPU6050_INST, DL_I2C_INTERRUPT_CONTROLLER_TX_DONE);
@@ -23,15 +28,15 @@ int mspm0_i2c_write(unsigned char slave_addr,
         cnt -= fillcnt;
         ptr += fillcnt;
 
-        if(DL_I2C_getControllerStatus(I2C_MPU6050_INST) & (DL_I2C_CONTROLLER_STATUS_ERROR | DL_I2C_CONTROLLER_STATUS_ARBITRATION_LOST))
+        mspm0_get_clock_ms(&cur);
+        if(cur >= (start + I2C_TIMEOUT_MS))
         {
-            DL_I2C_flushControllerTXFIFO(I2C_MPU6050_INST);
+            DL_I2C_reset(I2C_MPU6050_INST);
+            DL_I2C_enablePower(I2C_MPU6050_INST);
+            SYSCFG_DL_I2C_MPU6050_init();
             return -1;
         }
     } while (!DL_I2C_getRawInterruptStatus(I2C_MPU6050_INST, DL_I2C_INTERRUPT_CONTROLLER_TX_DONE));
-
-    while (DL_I2C_getControllerStatus(I2C_MPU6050_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS);
-    DL_I2C_flushControllerTXFIFO(I2C_MPU6050_INST);
 
     return 0;
 }
@@ -42,8 +47,12 @@ int mspm0_i2c_read(unsigned char slave_addr,
                     unsigned char *data)
 {
     unsigned i = 0;
+    unsigned long start, cur;
+
     if (!length)
         return 0;
+
+    mspm0_get_clock_ms(&start);
 
     DL_I2C_transmitControllerData(I2C_MPU6050_INST, reg_addr);
     I2C_MPU6050_INST->MASTER.MCTR = I2C_MCTR_RD_ON_TXEMPTY_ENABLE;
@@ -61,9 +70,14 @@ int mspm0_i2c_read(unsigned char slave_addr,
                 ++i;
             }
         }
-        if(DL_I2C_getControllerStatus(I2C_MPU6050_INST) & (DL_I2C_CONTROLLER_STATUS_ERROR | DL_I2C_CONTROLLER_STATUS_ARBITRATION_LOST))
+        
+        mspm0_get_clock_ms(&cur);
+        if(cur >= (start + I2C_TIMEOUT_MS))
         {
-            break;
+            DL_I2C_reset(I2C_MPU6050_INST);
+            DL_I2C_enablePower(I2C_MPU6050_INST);
+            SYSCFG_DL_I2C_MPU6050_init();
+            return -1;
         }
     } while(!DL_I2C_getRawInterruptStatus(I2C_MPU6050_INST, DL_I2C_INTERRUPT_CONTROLLER_RX_DONE));
 
