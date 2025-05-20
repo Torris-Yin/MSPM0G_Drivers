@@ -1,3 +1,3 @@
-[submodule "CMSIS-DSP-MSPM0"]
+[submodule "DCZYewen/CMSIS-DSP-MSPM0"]
 	path = DCZYewen/CMSIS-DSP-MSPM0
 	url = https://github.com/DCZYewen/CMSIS-DSP-MSPM0
