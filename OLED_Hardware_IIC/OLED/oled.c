@@ -1,5 +1,6 @@
 #include "oled.h"
-#include "oledfont.h"  	 
+#include "oledfont.h"
+#include "clock.h"  	 
 #include "ti/driverlib/m0p/dl_core.h"
 #ifdef __CC_ARM
 #pragma O0
@@ -10,6 +11,9 @@
 #else
 //adding ur own compiler controlling pragmas
 #endif
+
+#define I2C_TIMEOUT_MS  (10)
+
 //OLED的显存
 //存放格式如下.
 //[0]0 1 2 3 ... 127	
@@ -60,6 +64,7 @@ if(i==0)
 void OLED_WR_Byte(uint8_t dat,uint8_t mode)
 {
     unsigned char ptr[2];
+    unsigned long start, cur;
 
     if(mode)
     {
@@ -72,21 +77,23 @@ void OLED_WR_Byte(uint8_t dat,uint8_t mode)
         ptr[1] = dat;
     }
 
+    mspm0_get_clock_ms(&start);
+
     DL_I2C_fillControllerTXFIFO(I2C_OLED_INST, ptr, 2);
     DL_I2C_clearInterruptStatus(I2C_OLED_INST, DL_I2C_INTERRUPT_CONTROLLER_TX_DONE);
     DL_I2C_startControllerTransfer(I2C_OLED_INST, 0x3C, DL_I2C_CONTROLLER_DIRECTION_TX, 2);
 
     while (!DL_I2C_getRawInterruptStatus(I2C_OLED_INST, DL_I2C_INTERRUPT_CONTROLLER_TX_DONE))
     {
-        if(DL_I2C_getControllerStatus(I2C_OLED_INST) & (DL_I2C_CONTROLLER_STATUS_ERROR | DL_I2C_CONTROLLER_STATUS_ARBITRATION_LOST))
+        mspm0_get_clock_ms(&cur);
+        if(cur >= (start + I2C_TIMEOUT_MS))
         {
-            DL_I2C_flushControllerTXFIFO(I2C_OLED_INST);
-            return;
+            DL_I2C_reset(I2C_OLED_INST);
+            DL_I2C_enablePower(I2C_OLED_INST);
+            SYSCFG_DL_I2C_OLED_init();
+            break;
         }
     }
-
-    while (DL_I2C_getControllerStatus(I2C_OLED_INST) & DL_I2C_CONTROLLER_STATUS_BUSY_BUS);
-    DL_I2C_flushControllerTXFIFO(I2C_OLED_INST);
 }
 
 
